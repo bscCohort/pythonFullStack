@@ -1,16 +1,7 @@
-# import json, os
-# from http.server import BaseHTTPRequestHandler, HTTPServer
-
-# # Always use absolute path
-# BASE_DIR = os.path.dirname(__file__)
-# DATA_FILE = os.path.join(BASE_DIR, "notes.json")
-
-
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
-import os
 from urllib.parse import urlparse
-import data_store
+import database
 
 class StudentServerHandler(BaseHTTPRequestHandler):
     
@@ -29,7 +20,7 @@ class StudentServerHandler(BaseHTTPRequestHandler):
         
         if path == '/' or path == '/index.html':
             self.serve_html_file()
-        elif path == '/api/students':
+        elif path == '/api/students':   
             self.get_all_students()
         elif path.startswith('/api/students/'):
             student_id = int(path.split('/')[-1])
@@ -64,12 +55,12 @@ class StudentServerHandler(BaseHTTPRequestHandler):
     
     def get_all_students(self):
         """Get all students"""
-        students = data_store.get_all_students()
+        students = database.get_all_students()
         self.send_json_response(200, students)
     
     def get_student(self, student_id):
         """Get single student"""
-        student = data_store.get_student_by_id(student_id)
+        student = database.get_student_by_id(student_id)
         if student:
             self.send_json_response(200, student)
         else:
@@ -86,7 +77,7 @@ class StudentServerHandler(BaseHTTPRequestHandler):
                 self.send_json_response(400, {'error': 'Missing required fields'})
                 return
             
-            new_student = data_store.create_student(
+            new_student = database.create_student(
                 data['name'], 
                 data['email'], 
                 data['course'], 
@@ -105,7 +96,7 @@ class StudentServerHandler(BaseHTTPRequestHandler):
             put_data = self.rfile.read(content_length)
             data = json.loads(put_data.decode('utf-8'))
             
-            updated_student = data_store.update_student(
+            updated_student = database.update_student(
                 student_id,
                 data['name'],
                 data['email'],
@@ -123,7 +114,7 @@ class StudentServerHandler(BaseHTTPRequestHandler):
     
     def delete_student(self, student_id):
         """Delete student"""
-        deleted_student = data_store.delete_student(student_id)
+        deleted_student = database.delete_student(student_id)
         
         if deleted_student:
             self.send_json_response(200, {'message': 'Student deleted', 'student': deleted_student})
@@ -187,9 +178,13 @@ class StudentServerHandler(BaseHTTPRequestHandler):
 
 def run_server(port=8000):
     """Start server"""
+    # Initialize database on startup
+    database.init_database()
+    
     server_address = ('', port)
     httpd = HTTPServer(server_address, StudentServerHandler)
     print(f"🚀 Server running on http://localhost:{port}")
+    print(f"💾 Database: students.db")
     print("Press Ctrl+C to stop\n")
     
     try:
