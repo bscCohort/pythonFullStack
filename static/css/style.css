@@ -1,43 +1,10 @@
+/* Only for minor global tweaks */
+
 body {
-    background-color: #f4f6f9;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  scroll-behavior: smooth;
 }
 
-.container {
-    max-width: 1200px;
-}
-
-h1 {
-    color: #2c3e50;
-    font-weight: bold;
-}
-
-.card {
-    border: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border-radius: 8px;
-}
-
-.card-header {
-    border-radius: 8px 8px 0 0 !important;
-}
-
-.table {
-    margin-bottom: 0;
-}
-
-.btn-sm {
-    margin-right: 5px;
-}
-
-#alertContainer {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1050;
-    min-width: 300px;
-}
-
-.alert {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+/* Optional: animate alert fade */
+#alertContainer > div {
+  transition: all 0.3s ease;
 }
