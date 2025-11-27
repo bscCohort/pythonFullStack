@@ -5,7 +5,11 @@ from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse
 
 from controllers.students import (
-    get_all_students, get_student, create_student, update_student, delete_student
+    get_all_students
+    # , get_student
+    # , create_student
+    # , update_student
+    # , delete_student
 )
 
 from core.static import serve_static
