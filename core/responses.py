@@ -1,3 +1,5 @@
+# Sends HTTP responses back to the client (JSON or HTML)
+
 import json
 from core.middleware import add_cors_headers
 

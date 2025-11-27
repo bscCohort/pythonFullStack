@@ -1,3 +1,5 @@
+# Opens a connection to SQLite and returns it for DB operations
+
 import sqlite3
 
 DB_FILE = "students.db"

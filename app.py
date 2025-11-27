@@ -1,3 +1,5 @@
+# Starts the API server and initializes the database
+
 from http.server import HTTPServer
 from router import StudentRouter
 from database.connection import init_database
