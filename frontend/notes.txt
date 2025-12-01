@@ -1,0 +1,5 @@
+In real frontend projects:
+	•	Pages = views
+	•	JS = logic/services/controllers
+	•	CSS = design
+	•	Images = media

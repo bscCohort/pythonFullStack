@@ -3,7 +3,7 @@
 ##################### API Observation Via CURL
 
 # A. Get All Students
-curl -X GET "http://localhost:8000/api/students"
+curl -X GET "https://potential-space-garbanzo-9vvgrgg65j6cj5v-8000.app.github.dev/api/students"
 
 # B. Get One Student
 curl -X GET "http://localhost:8000/api/students/1"
