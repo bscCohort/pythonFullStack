@@ -1,58 +1,83 @@
-// import { apiGetAll, apiGetOne, apiCreate, apiUpdate, apiDelete } 
-//   from "../services/studentService.js";
+import { 
+    apiGetAll, 
+    // apiGetOne, 
+    // apiCreate, 
+    // apiUpdate, 
+    // apiDelete 
+} from "../services/studentService.js";
 
 // import { showAlert } from "../components/Alert.js";
-// import { renderStudentTable } from "../components/StudentTable.js";
-// import { resetForm, fillForm } from "../components/StudentForm.js";
+import { renderStudentTable } from "../components/StudentTable.js";
+import { resetForm, fillForm } from "../components/StudentForm.js";
 
-// import { setState, getState } from "../state/store.js";
-// import { $, createElement } from "../utils/dom.js";
+import { setState, getState } from "../state/store.js";
+import { $, createElement } from "../utils/dom.js";
 
-// // Setup event listeners and load initial data
-// export function initStudentController() {
-//   loadStudents();
+// Setup event listeners and load initial data
+// Initialize the main logic and set up all necessary event listeners
+export function initStudentController() {
+  // Start by fetching and displaying all student data immediately upon load
+  loadStudents();
 
-//   // Handle form submit (create or update)
-//   $("studentForm").addEventListener("submit", async (e) => {
-//     e.preventDefault();
+  // --- Handle Form Submissions ---
 
-//     const data = {
-//       name: $("name").value.trim(),
-//       email: $("email").value.trim(),
-//       course: $("course").value.trim(),
-//       year: $("year").value.trim()
-//     };
+  // Attach a listener to the 'submit' event of the student input form
+  $("studentForm").addEventListener("submit", async (e) => {
+    // Prevent the browser's default form submission behavior (page refresh)
+    e.preventDefault();
 
-//     const { editingId } = getState();
+    // Collect data from the input fields using the custom '$' selector
+    const data = {
+      name: $("name").value.trim(),   // Get name value, remove whitespace
+      email: $("email").value.trim(), // Get email value
+      course: $("course").value.trim(), // Get course value
+      year: $("year").value.trim()    // Get year value
+    };
 
-//     editingId
-//       ? await updateStudent(editingId, data)
-//       : await createNewStudent(data);
-//   });
+    // Check the application state to see if we are currently editing an existing record
+    const { editingId } = getState();
 
-//   // Cancel editing
-//   $("cancelBtn").addEventListener("click", () => {
-//     setState({ editingId: null });
-//     resetForm();
-//   });
-// }
+    // Use a ternary operator to decide which action to take:
+    editingId
+      ? await updateStudent(editingId, data) // If editingId exists, update the student
+      : await createNewStudent(data);        // Otherwise, create a new student
+  });
 
-// // Fetch students and update UI
-// export async function loadStudents() {
-//   const spinner = $("loadingSpinner");
-//   const table = $("studentsTableContainer");
+  // --- Handle Cancel Button Click ---
 
-//   spinner.style.display = "block";
-//   table.style.display = "none";
+  // Attach a listener to the 'click' event of the cancel button
+  $("cancelBtn").addEventListener("click", () => {
+    // Clear the editing state (set the ID to null)
+    setState({ editingId: null });
+    // Clear all input fields in the form
+    resetForm();
+  });
+}
 
-//   const students = await apiGetAll();
 
-//   setState({ students });
-//   renderStudentTable(students);
+// Fetch all student data from the API and update the user interface
+export async function loadStudents() {
+  // Get references to the loading spinner and the main data table elements
+  const spinner = $("loadingSpinner");
+  const table = $("studentsTableContainer");
 
-//   spinner.style.display = "none";
-//   table.style.display = "block";
-// }
+  // Show the spinner and hide the table to indicate a loading state
+  spinner.style.display = "block";
+  table.style.display = "none";
+
+  // Asynchronously fetch all student records from the backend API
+  const students = await apiGetAll();
+
+  // Store the retrieved student array in the application's global state
+  setState({ students });
+  // Render the fetched student data into the HTML table structure
+  renderStudentTable(students);
+
+  // Hide the spinner and show the table now that the data is loaded and displayed
+  spinner.style.display = "none";
+  table.style.display = "block";
+}
+
 
 // // Create a new student
 // export async function createNewStudent(data) {
