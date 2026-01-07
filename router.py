@@ -34,6 +34,11 @@ def handle_ui_routes(handler, path):
             serve_static(handler, "frontend/pages/index.html")
             return True
 
+    # Serve assets at /assets/...  -> frontend/assets/...
+    if path.startswith("/assets/"):
+        serve_static(handler, "frontend" + path)
+        return True
+
     if path.startswith("/frontend/"):
         serve_static(handler, path.lstrip("/"))
         return True
