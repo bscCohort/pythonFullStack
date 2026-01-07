@@ -1,6 +1,22 @@
 # 📘 **Student Management System – README**
 
-A mini full-stack project built with **Python (backend)** and **Vanilla JavaScript + Tailwind (frontend)**.
+### How to run the project
+
+```shell
+python app.py
+```
+
+### How to run the tests
+
+```shell
+python -m unittest -v
+```
+
+The app is deployed at this URL - https://pythonfullstack.onrender.com/
+
+---------------------------------------------------------------------------
+
+This mini full-stack project built with **Python (backend)** and **Vanilla JavaScript + Tailwind (frontend)**.
 
 This project helps you understand how real web apps work:
 
