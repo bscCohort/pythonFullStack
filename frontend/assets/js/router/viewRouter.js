@@ -1,6 +1,7 @@
 import { initStudentController } from "../controllers/studentController.js";
 import { initCourseController } from "../controllers/courseController.js";
 import { initEnrollmentController } from "../controllers/enrollmentController.js";
+import { initEnrollmentReportController } from "../controllers/reportController.js";
 
 
 async function loadView(path) {
@@ -25,6 +26,10 @@ export async function router() {
   else if (path === "/enrollments") {
     await loadView("/frontend/pages/enrollments.html");
     initEnrollmentController();
+  }
+  else if (path === "/reports/enrollments") {
+    await loadView("/frontend/pages/report_enrollments.html");
+    initEnrollmentReportController();
   }
   else {
     await loadView("/frontend/pages/404.html");

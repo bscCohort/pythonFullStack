@@ -3,6 +3,7 @@
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse
+from controllers.reports import get_enrollment_report
 
 from controllers.students import (
     get_all_students,
@@ -36,7 +37,7 @@ from core.middleware import add_cors_headers
 # UI ROUTER (SPA shell + static)
 # -------------------------------
 
-FRONTEND_ROUTES = {"/", "/home", "/students", "/courses", "/enrollments", "/docs"}
+FRONTEND_ROUTES = {"/", "/home", "/students", "/courses", "/enrollments", "/reports/enrollments", "/docs"}
 
 def handle_ui_routes(handler, path):
     if path in FRONTEND_ROUTES:
@@ -118,6 +119,12 @@ class StudentRouter(BaseHTTPRequestHandler):
         if path.startswith("/api/enrollments/"):
             enrollment_id = int(path.split("/")[-1])
             return get_enrollment(self, enrollment_id)
+        
+        # ---------------------------
+        # REPORTS (JOIN)
+        # ---------------------------
+        if path == "/api/reports/enrollments":
+            return get_enrollment_report(self)
 
         return send_404(self)
 
@@ -178,6 +185,7 @@ class StudentRouter(BaseHTTPRequestHandler):
             return delete_enrollment(self, enrollment_id)
 
         return send_404(self)
+    
 
 
     def log_message(self, format, *args):

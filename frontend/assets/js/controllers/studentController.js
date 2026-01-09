@@ -30,7 +30,6 @@ export function initStudentController() {
     const data = {
       name: $("name").value.trim(),   // Get name value, remove whitespace
       email: $("email").value.trim(), // Get email value
-      course: $("course").value.trim(), // Get course value
       year: $("year").value.trim()    // Get year value
     };
 

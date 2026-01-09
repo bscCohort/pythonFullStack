@@ -17,7 +17,6 @@ def init_database():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
             email TEXT,
-            course TEXT,
             year TEXT,
             created_at TEXT,
             updated_at TEXT

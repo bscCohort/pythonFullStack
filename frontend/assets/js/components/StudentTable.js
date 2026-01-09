@@ -31,7 +31,6 @@ export function renderStudentTable(students) {
       <td class="px-3 py-2">${student.id}</td>
       <td class="px-3 py-2">${student.name}</td>
       <td class="px-3 py-2">${student.email}</td>
-      <td class="px-3 py-2">${student.course}</td>
       <td class="px-3 py-2">${student.year}</td>
       <td class="px-3 py-2 flex space-x-2">
         <!-- Buttons are created with data attributes holding the student ID -->

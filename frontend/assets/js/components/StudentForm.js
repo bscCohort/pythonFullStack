@@ -17,7 +17,6 @@ export function fillForm(student) {
   // Fill each input field with the corresponding property from the student data
   $("name").value = student.name;
   $("email").value = student.email;
-  $("course").value = student.course;
   $("year").value = student.year;
 
   // Change the submit button text to "Update Student"
