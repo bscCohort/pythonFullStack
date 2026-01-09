@@ -11,6 +11,7 @@ def get_connection():
 
 def init_database():
     conn = get_connection()
+
     conn.execute("""
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,6 +23,30 @@ def init_database():
             updated_at TEXT
         )
     """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS courses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            code TEXT,
+            created_at TEXT,
+            updated_at TEXT
+        )
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS enrollments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            course_id INTEGER NOT NULL,
+            enrolled_on TEXT,
+            created_at TEXT,
+            updated_at TEXT,
+            FOREIGN KEY(student_id) REFERENCES students(id),
+            FOREIGN KEY(course_id) REFERENCES courses(id)
+        )
+    """)
+
     conn.commit()
     conn.close()
     print("✓ Database initialized")

@@ -12,6 +12,21 @@ from controllers.students import (
     delete_student,
 )
 
+from controllers.courses import (
+    get_all_courses,
+    get_course,
+    create_course,
+    update_course,
+    delete_course,
+)
+
+from controllers.enrollments import (
+    get_all_enrollments,
+    get_enrollment,
+    create_enrollment,
+    delete_enrollment,
+)
+
 from core.static import serve_static
 from core.responses import send_404
 from core.middleware import add_cors_headers
@@ -21,7 +36,7 @@ from core.middleware import add_cors_headers
 # UI ROUTER (SPA shell + static)
 # -------------------------------
 
-FRONTEND_ROUTES = {"/", "/home", "/students", "/docs"}
+FRONTEND_ROUTES = {"/", "/home", "/students", "/courses", "/enrollments", "/docs"}
 
 def handle_ui_routes(handler, path):
     if path in FRONTEND_ROUTES:
@@ -74,15 +89,35 @@ class StudentRouter(BaseHTTPRequestHandler):
         if handle_ui_routes(self, path):
             return
 
-
-
-        # 2. API READ routes
+        # ---------------------------
+        # STUDENTS
+        # ---------------------------
         if path == "/api/students":
             return get_all_students(self)
 
         if path.startswith("/api/students/"):
             student_id = int(path.split("/")[-1])
             return get_student(self, student_id)
+
+        # ---------------------------
+        # COURSES
+        # ---------------------------
+        if path == "/api/courses":
+            return get_all_courses(self)
+
+        if path.startswith("/api/courses/"):
+            course_id = int(path.split("/")[-1])
+            return get_course(self, course_id)
+
+        # ---------------------------
+        # ENROLLMENTS
+        # ---------------------------
+        if path == "/api/enrollments":
+            return get_all_enrollments(self)
+
+        if path.startswith("/api/enrollments/"):
+            enrollment_id = int(path.split("/")[-1])
+            return get_enrollment(self, enrollment_id)
 
         return send_404(self)
 
@@ -91,8 +126,18 @@ class StudentRouter(BaseHTTPRequestHandler):
     # CREATE (POST)
     # ---------------------------
     def do_POST(self):
+        # STUDENTS
         if self.path == "/api/students":
             return create_student(self)
+
+        # COURSES
+        if self.path == "/api/courses":
+            return create_course(self)
+
+        # ENROLLMENTS
+        if self.path == "/api/enrollments":
+            return create_enrollment(self)
+
         return send_404(self)
 
 
@@ -100,9 +145,16 @@ class StudentRouter(BaseHTTPRequestHandler):
     # UPDATE (PUT)
     # ---------------------------
     def do_PUT(self):
+        # STUDENTS
         if self.path.startswith("/api/students/"):
             student_id = int(self.path.split("/")[-1])
             return update_student(self, student_id)
+
+        # COURSES
+        if self.path.startswith("/api/courses/"):
+            course_id = int(self.path.split("/")[-1])
+            return update_course(self, course_id)
+
         return send_404(self)
 
 
@@ -110,9 +162,21 @@ class StudentRouter(BaseHTTPRequestHandler):
     # DELETE (DELETE)
     # ---------------------------
     def do_DELETE(self):
+        # STUDENTS
         if self.path.startswith("/api/students/"):
             student_id = int(self.path.split("/")[-1])
             return delete_student(self, student_id)
+
+        # COURSES
+        if self.path.startswith("/api/courses/"):
+            course_id = int(self.path.split("/")[-1])
+            return delete_course(self, course_id)
+
+        # ENROLLMENTS
+        if self.path.startswith("/api/enrollments/"):
+            enrollment_id = int(self.path.split("/")[-1])
+            return delete_enrollment(self, enrollment_id)
+
         return send_404(self)
 
 
