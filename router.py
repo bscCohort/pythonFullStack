@@ -37,7 +37,7 @@ from core.middleware import add_cors_headers
 # UI ROUTER (SPA shell + static)
 # -------------------------------
 
-FRONTEND_ROUTES = {"/", "/home", "/students", "/courses", "/enrollments", "/reports/enrollments", "/docs"}
+FRONTEND_ROUTES = {"/", "/home", "/students", "/courses", "/enrollments", "/reports/enrollments", "/docs/flow", "/docs"}
 
 def handle_ui_routes(handler, path):
     if path in FRONTEND_ROUTES:
