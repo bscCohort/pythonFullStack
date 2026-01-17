@@ -1,7 +1,12 @@
+// frontend/assets/js/state/store.js
+
 // Global app state
 let state = {
-  editingId: null,   // which student is being edited
-  students: []       // list of all students
+  students: [],
+  courses: [],
+  enrollments: [],
+  editingId: null,
+  editingCourseId: null,
 };
 
 // Update part of the state

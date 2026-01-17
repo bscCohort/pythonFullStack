@@ -1,5 +1,4 @@
-# Opens a connection to SQLite and returns it for DB operations
-
+# database/connection.py
 import sqlite3
 
 DB_FILE = "students.db"
@@ -8,6 +7,10 @@ def get_connection():
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     return conn
+
+def _column_exists(conn, table, column):
+    cols = conn.execute(f"PRAGMA table_info({table})").fetchall()
+    return any(c["name"] == column for c in cols)
 
 def init_database():
     conn = get_connection()
@@ -28,6 +31,9 @@ def init_database():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
             code TEXT,
+            teacher_name TEXT,
+            fees REAL,
+            duration_weeks INTEGER,
             created_at TEXT,
             updated_at TEXT
         )

@@ -61,6 +61,10 @@ def students_delete(student_id: int):
 # COURSES CRUD
 # -----------------------------
 
+# -----------------------------
+# COURSES CRUD (UPDATED)
+# -----------------------------
+
 def courses_get_all():
     conn = get_connection()
     rows = conn.execute("SELECT * FROM courses ORDER BY id DESC").fetchall()
@@ -76,9 +80,20 @@ def courses_get_one(course_id: int):
 def courses_create(data: dict):
     conn = get_connection()
     now = datetime.now().isoformat()
+
     cur = conn.execute(
-        "INSERT INTO courses (title, code, created_at) VALUES (?, ?, ?)",
-        (data["title"], data.get("code"), now)
+        """
+        INSERT INTO courses (title, code, teacher_name, fees, duration_weeks, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            data["title"],
+            data.get("code"),
+            data.get("teacher_name"),
+            data.get("fees"),
+            data.get("duration_weeks"),
+            now,
+        ),
     )
     conn.commit()
     new_id = cur.lastrowid
@@ -88,11 +103,23 @@ def courses_create(data: dict):
 def courses_update(course_id: int, data: dict):
     conn = get_connection()
     now = datetime.now().isoformat()
-    conn.execute("""
+
+    conn.execute(
+        """
         UPDATE courses
-        SET title=?, code=?, updated_at=?
+        SET title=?, code=?, teacher_name=?, fees=?, duration_weeks=?, updated_at=?
         WHERE id=?
-    """, (data["title"], data.get("code"), now, course_id))
+        """,
+        (
+            data["title"],
+            data.get("code"),
+            data.get("teacher_name"),
+            data.get("fees"),
+            data.get("duration_weeks"),
+            now,
+            course_id,
+        ),
+    )
     conn.commit()
     conn.close()
     return courses_get_one(course_id)
@@ -158,22 +185,30 @@ def enrollments_delete(enrollment_id: int):
 
 
 # -----------------------------
-# JOIN REPORT (for homework)
+# JOIN REPORT
 # -----------------------------
 
 def enrollment_report():
     """
-    Returns joined rows: enrollment + student name + course title
+    Returns joined rows: enrollment + student + course (full course details)
     """
     conn = get_connection()
     rows = conn.execute("""
         SELECT
             e.id AS enrollment_id,
             e.enrolled_on,
+
             s.id AS student_id,
             s.name AS student_name,
+            s.email AS student_email,
+            s.year AS student_year,
+
             c.id AS course_id,
-            c.title AS course_title
+            c.title AS course_title,
+            c.code AS course_code,
+            c.teacher_name AS teacher_name,
+            c.fees AS fees,
+            c.duration_weeks AS duration_weeks
         FROM enrollments e
         JOIN students s ON s.id = e.student_id
         JOIN courses c ON c.id = e.course_id

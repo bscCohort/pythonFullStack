@@ -1,5 +1,6 @@
-const BASE = window.ENV.API_BASE_URL.replace("/students", "");
-const API_URL = `${BASE}/enrollments`;
+// frontend/assets/js/services/enrollmentService.js
+
+const API_URL = "/api/enrollments";
 
 async function safeJson(res) {
   try { return await res.json(); } catch { return null; }
@@ -15,7 +16,7 @@ export function apiCreate(data) {
   return fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
 }
 

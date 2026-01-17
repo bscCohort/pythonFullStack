@@ -3,6 +3,7 @@
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse
+
 from controllers.reports import get_enrollment_report
 
 from controllers.students import (
@@ -37,24 +38,33 @@ from core.middleware import add_cors_headers
 # UI ROUTER (SPA shell + static)
 # -------------------------------
 
-FRONTEND_ROUTES = {"/", "/home", "/students", "/courses", "/enrollments", "/reports/enrollments", "/docs/flow", "/docs"}
+FRONTEND_ROUTES = {
+    "/", "/home",
+    "/students", "/courses", "/enrollments",
+    "/reports/enrollments",
+    "/docs/flow", "/docs",
+    "/profiles",
+}
 
 def handle_ui_routes(handler, path):
+    # Exact SPA routes
     if path in FRONTEND_ROUTES:
         serve_static(handler, "frontend/pages/index.html")
         return True
 
+    # Allow /something.html to map to SPA routes too
     if path.endswith(".html"):
         stripped = path.replace(".html", "")
         if stripped in FRONTEND_ROUTES:
             serve_static(handler, "frontend/pages/index.html")
             return True
 
-    # Serve assets at /assets/...  -> frontend/assets/...
+    # Serve assets at /assets/... -> frontend/assets/...
     if path.startswith("/assets/"):
         serve_static(handler, "frontend" + path)
         return True
 
+    # Serve anything under /frontend/ directly
     if path.startswith("/frontend/"):
         serve_static(handler, path.lstrip("/"))
         return True
@@ -63,9 +73,29 @@ def handle_ui_routes(handler, path):
         serve_static(handler, "openapi.yaml")
         return True
 
+    # Dynamic SPA routes (profiles pages)
+    # e.g. /profiles/1 should still load index.html and let the SPA router decide
+    if path.startswith("/profiles/"):
+        serve_static(handler, "frontend/pages/index.html")
+        return True
+
     return False
 
 
+# -------------------------------
+# Helpers
+# -------------------------------
+
+def _last_path_id_or_404(handler, path):
+    """
+    Extract the last path segment and ensure it's a number.
+    If it's not a number, return None after sending 404 (no crash).
+    """
+    last = path.split("/")[-1]
+    if not last.isdigit():
+        send_404(handler)
+        return None
+    return int(last)
 
 
 # -------------------------------
@@ -79,14 +109,13 @@ class StudentRouter(BaseHTTPRequestHandler):
         add_cors_headers(self)
         self.end_headers()
 
-
     # ---------------------------
     # READ (GET)
     # ---------------------------
     def do_GET(self):
         path = urlparse(self.path).path
 
-        # 1. UI routes first (SPA)
+        # 1) UI routes first (SPA + static)
         if handle_ui_routes(self, path):
             return
 
@@ -97,7 +126,9 @@ class StudentRouter(BaseHTTPRequestHandler):
             return get_all_students(self)
 
         if path.startswith("/api/students/"):
-            student_id = int(path.split("/")[-1])
+            student_id = _last_path_id_or_404(self, path)
+            if student_id is None:
+                return
             return get_student(self, student_id)
 
         # ---------------------------
@@ -107,7 +138,9 @@ class StudentRouter(BaseHTTPRequestHandler):
             return get_all_courses(self)
 
         if path.startswith("/api/courses/"):
-            course_id = int(path.split("/")[-1])
+            course_id = _last_path_id_or_404(self, path)
+            if course_id is None:
+                return
             return get_course(self, course_id)
 
         # ---------------------------
@@ -117,9 +150,11 @@ class StudentRouter(BaseHTTPRequestHandler):
             return get_all_enrollments(self)
 
         if path.startswith("/api/enrollments/"):
-            enrollment_id = int(path.split("/")[-1])
+            enrollment_id = _last_path_id_or_404(self, path)
+            if enrollment_id is None:
+                return
             return get_enrollment(self, enrollment_id)
-        
+
         # ---------------------------
         # REPORTS (JOIN)
         # ---------------------------
@@ -128,65 +163,76 @@ class StudentRouter(BaseHTTPRequestHandler):
 
         return send_404(self)
 
-
     # ---------------------------
     # CREATE (POST)
     # ---------------------------
     def do_POST(self):
+        path = urlparse(self.path).path
+
         # STUDENTS
-        if self.path == "/api/students":
+        if path == "/api/students":
             return create_student(self)
 
         # COURSES
-        if self.path == "/api/courses":
+        if path == "/api/courses":
             return create_course(self)
 
         # ENROLLMENTS
-        if self.path == "/api/enrollments":
+        if path == "/api/enrollments":
             return create_enrollment(self)
 
         return send_404(self)
-
 
     # ---------------------------
     # UPDATE (PUT)
     # ---------------------------
     def do_PUT(self):
+        path = urlparse(self.path).path
+
         # STUDENTS
-        if self.path.startswith("/api/students/"):
-            student_id = int(self.path.split("/")[-1])
+        if path.startswith("/api/students/"):
+            student_id = _last_path_id_or_404(self, path)
+            if student_id is None:
+                return
             return update_student(self, student_id)
 
         # COURSES
-        if self.path.startswith("/api/courses/"):
-            course_id = int(self.path.split("/")[-1])
+        if path.startswith("/api/courses/"):
+            course_id = _last_path_id_or_404(self, path)
+            if course_id is None:
+                return
             return update_course(self, course_id)
 
         return send_404(self)
-
 
     # ---------------------------
     # DELETE (DELETE)
     # ---------------------------
     def do_DELETE(self):
+        path = urlparse(self.path).path
+
         # STUDENTS
-        if self.path.startswith("/api/students/"):
-            student_id = int(self.path.split("/")[-1])
+        if path.startswith("/api/students/"):
+            student_id = _last_path_id_or_404(self, path)
+            if student_id is None:
+                return
             return delete_student(self, student_id)
 
         # COURSES
-        if self.path.startswith("/api/courses/"):
-            course_id = int(self.path.split("/")[-1])
+        if path.startswith("/api/courses/"):
+            course_id = _last_path_id_or_404(self, path)
+            if course_id is None:
+                return
             return delete_course(self, course_id)
 
         # ENROLLMENTS
-        if self.path.startswith("/api/enrollments/"):
-            enrollment_id = int(self.path.split("/")[-1])
+        if path.startswith("/api/enrollments/"):
+            enrollment_id = _last_path_id_or_404(self, path)
+            if enrollment_id is None:
+                return
             return delete_enrollment(self, enrollment_id)
 
         return send_404(self)
-    
-
 
     def log_message(self, format, *args):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

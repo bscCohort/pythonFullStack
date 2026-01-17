@@ -1,6 +1,8 @@
+// frontend/assets/js/controllers/enrollmentController.js
+
 import { apiGetAll as apiGetAllEnrollments, apiCreate, apiDelete } from "../services/enrollmentService.js";
 import { apiGetAll as apiGetAllStudents } from "../services/studentService.js";
-import { apiGetAll as apiGetAllCourses } from "../services/courseService.js";
+import { apiGetAllCourses } from "../services/courseService.js";
 
 import { showAlert } from "../components/Alert.js";
 import { renderEnrollmentTable } from "../components/EnrollmentTable.js";
@@ -23,6 +25,8 @@ export function initEnrollmentController() {
     if (res.ok) {
       showAlert("Enrollment created!");
       await loadEnrollmentsOnly();
+    } else {
+      showAlert("Failed to create enrollment", "error");
     }
   });
 }
@@ -32,7 +36,11 @@ async function loadEverything() {
 }
 
 async function loadStudentsAndCourses() {
-  const [students, courses] = await Promise.all([apiGetAllStudents(), apiGetAllCourses()]);
+  const [students, courses] = await Promise.all([
+    apiGetAllStudents(),
+    apiGetAllCourses(),
+  ]);
+
   fillEnrollmentDropdowns(students, courses);
 }
 
@@ -52,9 +60,12 @@ async function loadEnrollmentsOnly() {
 
 export async function deleteEnrollmentAction(id) {
   if (!confirm("Delete this enrollment?")) return;
+
   const res = await apiDelete(id);
   if (res.ok) {
     showAlert("Enrollment deleted!");
     await loadEnrollmentsOnly();
+  } else {
+    showAlert("Failed to delete enrollment", "error");
   }
 }

@@ -1,7 +1,15 @@
-import { apiGetAll, apiGetOne, apiCreate, apiUpdate, apiDelete } from "../services/courseService.js";
+import {
+  apiGetAllCourses,
+  apiGetCourse,
+  apiCreateCourse,
+  apiUpdateCourse,
+  apiDeleteCourse,
+} from "../services/courseService.js";
+
 import { showAlert } from "../components/Alert.js";
 import { renderCourseTable } from "../components/CourseTable.js";
 import { resetCourseForm, fillCourseForm } from "../components/CourseForm.js";
+
 import { setState, getState } from "../state/store.js";
 import { $ } from "../utils/dom.js";
 
@@ -13,68 +21,80 @@ export function initCourseController() {
 
     const data = {
       title: $("title").value.trim(),
-      code: $("code").value.trim()
+      code: $("code").value.trim(),
+      teacher_name: $("teacher_name").value.trim(),
+      fees: Number($("fees").value),
+      duration_weeks: Number($("duration_weeks").value),
     };
 
-    const { editingId } = getState();
-
-    editingId
-      ? await updateCourse(editingId, data)
-      : await createNewCourse(data);
+    const { editingCourseId } = getState();
+    editingCourseId
+      ? await updateCourse(editingCourseId, data)
+      : await createCourse(data);
   });
 
   $("cancelBtn").addEventListener("click", () => {
-    setState({ editingId: null });
+    setState({ editingCourseId: null });
     resetCourseForm();
   });
 }
 
-async function loadCourses() {
+export async function loadCourses() {
   const spinner = $("loadingSpinner");
   const table = $("coursesTableContainer");
 
-  spinner.style.display = "block";
-  table.style.display = "none";
+  // show spinner, hide table
+  spinner.classList.remove("hidden");
+  table.classList.add("hidden");
 
-  const courses = await apiGetAll();
+  const courses = await apiGetAllCourses();
   setState({ courses });
   renderCourseTable(courses);
 
-  spinner.style.display = "none";
-  table.style.display = "block";
+  // hide spinner, show table
+  spinner.classList.add("hidden");
+  table.classList.remove("hidden");
 }
 
-async function createNewCourse(data) {
-  const res = await apiCreate(data);
+export async function createCourse(data) {
+  const res = await apiCreateCourse(data);
   if (res.ok) {
     showAlert("Course added!");
     resetCourseForm();
     loadCourses();
+  } else {
+    showAlert("Failed to add course", "error");
   }
 }
 
 export async function editCourse(id) {
-  const course = await apiGetOne(id);
-  setState({ editingId: id });
+  const course = await apiGetCourse(id);
+  if (!course) return;
+
   fillCourseForm(course);
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-async function updateCourse(id, data) {
-  const res = await apiUpdate(id, data);
+export async function updateCourse(id, data) {
+  const res = await apiUpdateCourse(id, data);
   if (res.ok) {
     showAlert("Course updated!");
     resetCourseForm();
-    setState({ editingId: null });
+    setState({ editingCourseId: null });
     loadCourses();
+  } else {
+    showAlert("Failed to update course", "error");
   }
 }
 
 export async function deleteCourseAction(id) {
   if (!confirm("Delete this course?")) return;
-  const res = await apiDelete(id);
+
+  const res = await apiDeleteCourse(id);
   if (res.ok) {
     showAlert("Course deleted!");
     loadCourses();
+  } else {
+    showAlert("Failed to delete course", "error");
   }
 }

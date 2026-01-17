@@ -14,6 +14,12 @@ python -m unittest -v
 
 The app is deployed at this URL - https://pythonfullstack.onrender.com/
 
+### Performance Optimizations Used
+
+- Implemented client-side routing (SPA) to avoid full page reloads and make navigation instant.
+- Used a threaded Python HTTP server and optimized static file serving to handle multiple requests efficiently.
+- Loaded data only when required (lazy loading) and reused common API responses to reduce unnecessary database calls.
+
 ---------------------------------------------------------------------------
 
 This mini full-stack project built with **Python (backend)** and **Vanilla JavaScript + Tailwind (frontend)**.

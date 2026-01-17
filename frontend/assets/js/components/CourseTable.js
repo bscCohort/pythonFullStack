@@ -1,37 +1,57 @@
+// frontend/assets/js/components/CourseTable.js
+
 import { $ } from "../utils/dom.js";
 import { editCourse, deleteCourseAction } from "../controllers/courseController.js";
 
 export function renderCourseTable(courses) {
   const body = $("coursesTableBody");
-  const empty = $("noCourses");
+  const noCourses = $("noCourses");
+
+  if (!body) return;
 
   body.innerHTML = "";
 
   if (!courses || courses.length === 0) {
-    empty.classList.remove("hidden");
+    if (noCourses) noCourses.classList.remove("hidden");
     return;
   }
-  empty.classList.add("hidden");
 
-  courses.forEach(c => {
+  if (noCourses) noCourses.classList.add("hidden");
+
+  courses.forEach((c) => {
     const tr = document.createElement("tr");
+    tr.className = "border-b";
+
     tr.innerHTML = `
-      <td class="px-3 py-2 border">${c.id}</td>
-      <td class="px-3 py-2 border">${c.title ?? ""}</td>
-      <td class="px-3 py-2 border">${c.code ?? ""}</td>
-      <td class="px-3 py-2 border">
-        <button class="text-blue-600 underline mr-3" data-edit="${c.id}">Edit</button>
-        <button class="text-red-600 underline" data-del="${c.id}">Delete</button>
+      <td class="px-3 py-2">${c.id ?? "-"}</td>
+      <td class="px-3 py-2">${c.title ?? "-"}</td>
+      <td class="px-3 py-2">${c.code ?? "-"}</td>
+      <td class="px-3 py-2">${c.teacher_name ?? "-"}</td>
+      <td class="px-3 py-2">${c.fees ?? "-"}</td>
+      <td class="px-3 py-2">${c.duration_weeks ?? "-"}</td>
+      <td class="px-3 py-2">
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="px-3 py-1 rounded border text-blue-600 hover:bg-blue-50"
+            data-edit
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            class="px-3 py-1 rounded border text-red-600 hover:bg-red-50"
+            data-delete
+          >
+            Delete
+          </button>
+        </div>
       </td>
     `;
+
+    tr.querySelector("[data-edit]").addEventListener("click", () => editCourse(c.id));
+    tr.querySelector("[data-delete]").addEventListener("click", () => deleteCourseAction(c.id));
+
     body.appendChild(tr);
-  });
-
-  body.querySelectorAll("[data-edit]").forEach(btn => {
-    btn.addEventListener("click", () => editCourse(Number(btn.dataset.edit)));
-  });
-
-  body.querySelectorAll("[data-del]").forEach(btn => {
-    btn.addEventListener("click", () => deleteCourseAction(Number(btn.dataset.del)));
   });
 }

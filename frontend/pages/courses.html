@@ -1,16 +1,32 @@
-<div class="max-w-3xl mx-auto p-6">
+<div class="max-w-5xl mx-auto p-6">
 
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-3xl font-bold">Course Management</h1>
+    <h1 class="text-3xl font-bold">Courses</h1>
     <a href="/home" data-link class="text-sm text-blue-600 underline">← Back to Home</a>
   </div>
 
+  <!-- Add / Edit Course Form -->
   <div class="bg-white p-5 rounded shadow mb-8">
     <h2 class="font-semibold mb-3 text-lg">Add New Course</h2>
 
     <form id="courseForm" class="space-y-3">
-      <input type="text" id="title" placeholder="Course Title" required class="w-full border rounded px-3 py-2">
-      <input type="text" id="code" placeholder="Course Code (optional)" class="w-full border rounded px-3 py-2">
+
+      <input type="text" id="title" placeholder="Course Title" required
+        class="w-full border rounded px-3 py-2">
+
+      <input type="text" id="code" placeholder="Course Code (optional)"
+        class="w-full border rounded px-3 py-2">
+
+      <input type="text" id="teacher_name" placeholder="Teacher Name" required
+        class="w-full border rounded px-3 py-2">
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <input type="number" id="fees" placeholder="Fees (e.g. 4999)" required min="0"
+          class="w-full border rounded px-3 py-2">
+
+        <input type="number" id="duration_weeks" placeholder="Duration in weeks (e.g. 12)" required min="1"
+          class="w-full border rounded px-3 py-2">
+      </div>
 
       <div class="flex space-x-2">
         <button type="submit" id="submitBtn"
@@ -26,6 +42,7 @@
     </form>
   </div>
 
+  <!-- Courses Table -->
   <div class="bg-white p-5 rounded shadow">
     <h2 class="font-semibold mb-4 text-lg">All Courses</h2>
 
@@ -40,6 +57,9 @@
             <th class="px-3 py-2">ID</th>
             <th class="px-3 py-2">Title</th>
             <th class="px-3 py-2">Code</th>
+            <th class="px-3 py-2">Teacher</th>
+            <th class="px-3 py-2">Fees</th>
+            <th class="px-3 py-2">Weeks</th>
             <th class="px-3 py-2">Actions</th>
           </tr>
         </thead>
