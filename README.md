@@ -1,16 +1,112 @@
 # 📘 **Student Management System – README**
 
+### What you need first
+
+- **Python 3.10+** and **Node 18+**
+- A free **PostgreSQL** database. Get one at https://neon.tech or from
+  Vercel -> Storage -> Postgres. Copy the **pooled** connection string,
+  the one with `-pooler` in the hostname.
+
+### One-time setup
+
+```shell
+# 1. Backend: install the two Python packages it needs
+cd backend
+pip install -r requirements.txt
+
+# 2. Tell it where your database is
+cp .env.example .env
+#    now open .env and paste your connection string into DATABASE_URL
+
+# 3. Frontend: install the JavaScript packages
+cd ../frontend
+npm install
+```
+
 ### How to run the project
 
-```shell
-python app.py
-```
+Two terminals, because this is two programs.
 
-### How to run the tests
+**Terminal 1, the backend (API + database):**
 
 ```shell
-python -m unittest -v
+cd backend
+uvicorn main:app --reload
 ```
+
+Runs on http://localhost:8000
+
+`--reload` restarts the server every time you save a file, so you do not have
+to stop and start it yourself.
+
+**Open http://localhost:8000/docs** to see every endpoint documented, with a
+form to try each one. FastAPI builds that page by reading `routes.py` and
+`schemas.py`. You do not write or maintain it.
+
+**Terminal 2, the frontend (React):**
+
+```shell
+cd frontend
+npm run dev
+```
+
+Open **http://localhost:5173**
+
+Why two? The React dev server reloads instantly when you save a file.
+Anything it requests at `/api/...` is forwarded to the Python server on
+port 8000. That forwarding is set up in `frontend/vite.config.js`.
+
+### How to run it the way it is deployed
+
+One program instead of two. Build the frontend once, then Python serves it:
+
+```shell
+cd frontend && npm run build && cd ../backend
+uvicorn main:app
+```
+
+Open **http://localhost:8000**
+
+### The database starts empty
+
+The tables are created automatically the first time you run `uvicorn main:app --reload`,
+but there are no rows in them. Add your first student, course and enrollment
+through the app itself. That is the point: you will see exactly which request
+goes out and which row appears.
+
+### Settings
+
+The whole app reads **three** environment variables. That is all.
+
+| Variable | Where it lives | What it does |
+|---|---|---|
+| `DATABASE_URL` | `backend/.env` | Which Postgres to talk to. **Secret.** |
+| `PORT` | optional | Which port the API listens on. Defaults to 8000. |
+| `VITE_API_URL` | `frontend/.env` | Where the frontend looks for the API. **Public.** |
+
+`backend/.env` is never committed, because it holds the database password.
+`frontend/.env` is safe to commit, because everything in it ends up in the
+browser anyway. Both have a `.env.example` next to them showing the shape.
+
+**When you deploy**, set `DATABASE_URL` in your hosting provider's dashboard.
+It cannot come from `.env`, because that file is not in git.
+
+### Project layout
+
+```
+backend/     FastAPI. Talks to Postgres. Holds the secrets.
+  main.py         the server: CORS, startup, serving the built React app
+  routes.py       every endpoint, in one file
+  schemas.py      the shape of incoming data. Pydantic checks it for us
+  services/       rules that span more than one table
+  database/       SQL, one file per table
+  config.py       settings, read from .env
+frontend/    React app. Runs in the browser. Holds NO secrets.
+```
+
+That split is a rule, not a preference: **anything inside `frontend/` can end
+up in the browser where anyone can read it.** The database password lives in
+`backend/.env` and never leaves the server.
 
 The app is deployed at this URL - https://pythonfullstack.onrender.com/
 
@@ -197,7 +293,7 @@ pythonFullStack/
 ## 📦 **Run the App**
 
 ```
-python app.py
+uvicorn main:app --reload
 ```
 
 Visit:

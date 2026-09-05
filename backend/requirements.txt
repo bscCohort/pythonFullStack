@@ -1,0 +1,12 @@
+# The web framework. It handles routing, reading JSON, writing JSON, CORS,
+# status codes, and it generates interactive API docs at /docs for free.
+fastapi==0.121.2
+
+# The server that actually runs FastAPI. --reload restarts on every save.
+uvicorn[standard]==0.38.0
+
+# Talks to PostgreSQL.
+psycopg[binary]==3.2.10
+
+# Reads the .env file so the database password is not in the code.
+python-dotenv==1.1.1

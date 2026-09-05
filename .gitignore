@@ -1,3 +1,7 @@
 # Ignore Python cache directories
 __pycache__/
 **/__pycache__/
+
+# MkDocs build output. The published site is generated, never committed.
+# `mkdocs gh-deploy` pushes it to the gh-pages branch for us.
+docs/site/

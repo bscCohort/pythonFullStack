@@ -3,49 +3,68 @@ name: CI
 on:
   push:
     branches: ["main"]
+  pull_request:
   workflow_dispatch:
 
 jobs:
-  build-and-smoke-test:
+  # Does the Python still parse? Catches typos and bad indentation in every file,
+  # without needing a database.
+  backend:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Syntax check (compile)
-        run: |
-          python -m compileall -q .
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
 
-      - name: Run unit tests
-        run: |
-          python -m unittest -v
+      - name: Syntax check every file
+        run: python -m compileall -q backend
 
-      # Smoke test: start server & hit endpoints
-      - name: Start server (background)
-        env:
-          PORT: "8000"
-        run: |
-          # Start server in background
-          python app.py &
-          echo $! > server.pid
+      - name: Check the app can be imported
+        # Importing main.py proves every route, model and import path is valid.
+        # It does NOT connect to the database: that happens on startup, not import.
+        working-directory: backend
+        run: python -c "import main; print('imported', len(main.app.routes), 'routes')"
 
-          # Give it a moment to boot
-          sleep 2
+  # Does the React app still build? This is the check that would have caught
+  # the .env.production bug, where the wrong API URL was baked into the bundle.
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Smoke test endpoints
-        run: |
-          curl -i http://127.0.0.1:8000/ | head -n 20
-          curl -i http://127.0.0.1:8000/api/students | head -n 50
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Stop server
-        if: always()
-        run: |
-          if [ -f server.pid ]; then
-            kill "$(cat server.pid)" || true
-          fi
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build
+        working-directory: frontend
+        run: npm run build
+
+  # Does the course site still build, with no broken internal links?
+  # --strict turns warnings into failures, which is what makes this useful.
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install MkDocs
+        run: pip install -r docs/requirements.txt
+
+      - name: Build with warnings as errors
+        working-directory: docs
+        run: mkdocs build --strict

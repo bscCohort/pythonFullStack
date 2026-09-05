@@ -1,0 +1,12 @@
+# Never commit real credentials
+.env
+.env.*
+!.env.example
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# The old SQLite database. Postgres is the database now.
+*.db
