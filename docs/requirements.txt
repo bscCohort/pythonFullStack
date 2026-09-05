@@ -1,0 +1,4 @@
+# Only needed to build or preview the course site.
+#   pip install -r docs/requirements.txt
+#   cd docs && mkdocs serve
+mkdocs-material==9.7.7

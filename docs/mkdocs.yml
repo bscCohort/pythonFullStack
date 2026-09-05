@@ -1,0 +1,157 @@
+site_name: Full Stack, End to End
+site_url: https://bsccohort.github.io/pythonFullStack/
+site_description: A two-month industrial training course built around one real project.
+site_author: Asutosh Panda
+
+# Every page students read lives in docs/notes/.
+# Run the site from this folder:  cd docs && mkdocs serve
+docs_dir: notes
+
+theme:
+  name: material
+
+  # Light and dark, because a projector and a laptop want different things.
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+  features:
+    - navigation.tabs           # top level sections become tabs
+    - navigation.sections       # group pages in the sidebar
+    - navigation.top            # back-to-top button
+    - navigation.footer         # previous / next links, good for a linear path
+    - navigation.indexes        # a section can have its own landing page
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy         # copy button on every code block
+    - content.code.annotate     # numbered markers inside code blocks
+    - content.tabs.link
+
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  # Callout boxes: !!! note, !!! warning, !!! tip
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+
+  # Code blocks: syntax highlighting, line numbers, and the numbered
+  # annotations that expand when you click them. Very useful in class.
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        # This is what makes ```mermaid blocks render as diagrams.
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+# Our own CSS, which is how the animated diagrams work.
+extra_css:
+  - stylesheets/extra.css
+
+nav:
+  - Start here:
+      - index.md
+      - How to use this site: how-to-use.md
+
+
+
+  - Concepts:
+      - concepts/index.md
+      - The Internet:
+          - concepts/internet/how-the-internet-works.md
+          - concepts/internet/ip-and-packets.md
+          - concepts/internet/dns-and-domains.md
+          - concepts/internet/who-owns-what.md
+          - concepts/internet/dns-records.md
+          - concepts/internet/http-vs-https.md
+          - concepts/internet/certificates-and-tls.md
+          - concepts/internet/ports.md
+      - The Web:
+          - concepts/web/how-browsers-work.md
+          - concepts/web/html-css-js.md
+          - concepts/web/javascript-versions.md
+          - concepts/web/frameworks.md
+          - concepts/web/cors.md
+          - concepts/web/spa-vs-server-rendered.md
+      - APIs:
+          - concepts/api/what-is-an-api.md
+          - concepts/api/status-codes.md
+          - concepts/api/json.md
+      - Databases:
+          - concepts/database/tables-and-keys.md
+          - concepts/database/joins.md
+          - concepts/database/sql-injection.md
+          - concepts/database/migrations.md
+      - Git and GitHub:
+          - concepts/git/index.md
+          - concepts/git/commits.md
+          - concepts/git/branches.md
+          - concepts/git/remotes.md
+          - concepts/git/pull-requests.md
+          - concepts/git/when-it-goes-wrong.md
+      - Deployment:
+          - concepts/deploy/index.md
+          - concepts/deploy/what-is-a-server.md
+          - concepts/deploy/neon.md
+          - concepts/deploy/render.md
+          - concepts/deploy/vercel.md
+          - concepts/deploy/env-and-secrets.md
+      - Testing:
+          - concepts/testing/index.md
+          - concepts/testing/why-test.md
+          - concepts/testing/kinds-of-test.md
+          - concepts/testing/testing-this-project.md
+      - Tooling:
+          - concepts/tooling/git-cheatsheet.md
+          - concepts/tooling/environments.md
+          - concepts/tooling/env-vars.md
+          - concepts/tooling/terminal.md
+
+  - The Codebase:
+      - codebase/index.md
+      - "Backend: api/": codebase/backend-api.md
+      - "Backend: database/": codebase/backend-database.md
+      - "Frontend: src/": codebase/frontend.md
+
+  - The Industry:
+      - industry/index.md
+      - Domains of engineering: industry/domains.md
+      - Roles and job titles: industry/roles.md
+      - Levels and the ladder: industry/levels.md
+      - Kinds of company: industry/company-types.md
+      - Money: industry/compensation.md
+      - How to get in: industry/getting-hired.md
+
+  - Do It Yourself:
+      - diy.md
+
+  - Resources: resources.md

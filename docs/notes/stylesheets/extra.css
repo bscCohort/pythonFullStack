@@ -1,0 +1,490 @@
+/* docs/stylesheets/extra.css
+ *
+ * THIS FILE IS THE ANSWER TO "markdown cannot do animations".
+ *
+ * MkDocs renders markdown, but any page may also contain raw HTML, and this
+ * stylesheet is loaded on every page. So you get both:
+ *
+ *   - 90% of pages stay plain markdown, which is fast to write
+ *   - the 2 or 3 diagrams that need to move get real HTML + CSS
+ *
+ * Nothing here needs a JavaScript library. These are plain CSS keyframes.
+ */
+
+
+/* ==========================================================================
+   REQUEST FLOW DIAGRAM
+   A dot travels browser -> API -> database and back, on a loop.
+   Used on the "what happens when you press Enter" page.
+   ========================================================================== */
+
+.flow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 1.5rem 1rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 8px;
+  background: var(--md-code-bg-color);
+  overflow-x: auto;
+}
+
+.flow-box {
+  flex: 0 0 auto;
+  min-width: 110px;
+  text-align: center;
+  padding: 0.75rem 0.5rem;
+  border-radius: 6px;
+  border: 2px solid var(--md-primary-fg-color);
+  background: var(--md-default-bg-color);
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
+.flow-box strong {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 0.15rem;
+}
+
+.flow-box small {
+  color: var(--md-default-fg-color--light);
+  font-family: var(--md-code-font-family);
+  font-size: 0.65rem;
+}
+
+/* The wire between two boxes, with a dot that runs along it. */
+.flow-wire {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 40px;
+  height: 2px;
+  background: var(--md-default-fg-color--lightest);
+}
+
+.flow-wire::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--md-primary-fg-color);
+  animation: flow-travel 4s ease-in-out infinite;
+}
+
+/* Each wire starts a little later, so the dot looks like one packet moving
+   through the whole chain rather than three dots moving at once. */
+.flow-wire:nth-of-type(2)::after { animation-delay: 0.8s; }
+.flow-wire:nth-of-type(3)::after { animation-delay: 1.6s; }
+
+@keyframes flow-travel {
+  0%   { left: 0;              opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { left: calc(100% - 10px); opacity: 0; }
+}
+
+/* Respect people who have asked their computer to stop animating things.
+   This is an accessibility setting, and honouring it is not optional. */
+@media (prefers-reduced-motion: reduce) {
+  .flow-wire::after { animation: none; opacity: 1; }
+}
+
+
+/* ==========================================================================
+   STEP LIST
+   A numbered walkthrough where each step fades in. Used on the path pages.
+   ========================================================================== */
+
+.steps {
+  counter-reset: step;
+  list-style: none;
+  padding-left: 0;
+}
+
+.steps > li {
+  counter-increment: step;
+  position: relative;
+  padding: 0.6rem 0 0.6rem 2.6rem;
+  border-left: 2px solid var(--md-default-fg-color--lightest);
+  margin-left: 0.9rem;
+}
+
+.steps > li::before {
+  content: counter(step);
+  position: absolute;
+  left: -0.95rem;
+  top: 0.55rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  background: var(--md-primary-fg-color);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.steps > li:last-child { border-left-color: transparent; }
+
+
+/* ==========================================================================
+   LAYER DIAGRAM
+   The two-file-per-resource pattern, drawn as stacked bands.
+   ========================================================================== */
+
+.layers { margin: 1.5rem 0; }
+
+.layer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+  border-left: 5px solid var(--md-primary-fg-color);
+  background: var(--md-code-bg-color);
+  transition: transform 0.15s ease;
+}
+
+.layer:hover { transform: translateX(6px); }
+
+.layer code {
+  flex: 0 0 190px;
+  font-weight: 600;
+  background: none;
+  padding: 0;
+}
+
+.layer span { font-size: 0.8rem; color: var(--md-default-fg-color--light); }
+
+
+/* ==========================================================================
+   SMALL HELPERS
+   ========================================================================== */
+
+/* Side-by-side "before and after" comparison. */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+@media (max-width: 700px) {
+  .compare { grid-template-columns: 1fr; }
+}
+
+/* A key term the first time it appears. */
+.term {
+  font-weight: 600;
+  border-bottom: 2px dotted var(--md-primary-fg-color);
+  cursor: help;
+}
+
+
+/* ==========================================================================
+   REUSABLE DIAGRAM COMPONENTS
+   ==========================================================================
+   Added so that every page can drop in a moving diagram without writing new
+   CSS. Each block below documents the HTML it expects.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   CHAIN: a request hopping through several parties, one hop lighting up at a
+   time. Used for DNS resolution, TLS handshake, deployment pipelines.
+
+   <div class="chain">
+     <div class="chain-node"><b>Browser</b><i>asks for a name</i></div>
+     <div class="chain-node"><b>Resolver</b><i>ISP or 8.8.8.8</i></div>
+     ...
+   </div>
+   -------------------------------------------------------------------------- */
+
+.chain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: stretch;
+  margin: 1.5rem 0;
+}
+
+.chain-node {
+  flex: 1 1 130px;
+  padding: 0.7rem 0.6rem;
+  border-radius: 6px;
+  border: 2px solid var(--md-default-fg-color--lightest);
+  background: var(--md-code-bg-color);
+  text-align: center;
+  font-size: 0.72rem;
+  animation: chain-pulse 6s ease-in-out infinite;
+}
+
+.chain-node b { display: block; font-size: 0.8rem; margin-bottom: 0.2rem; }
+.chain-node i {
+  font-style: normal;
+  color: var(--md-default-fg-color--light);
+  font-family: var(--md-code-font-family);
+  font-size: 0.65rem;
+}
+
+/* Each node lights up a beat after the one before it. */
+.chain-node:nth-child(1) { animation-delay: 0s; }
+.chain-node:nth-child(2) { animation-delay: 0.7s; }
+.chain-node:nth-child(3) { animation-delay: 1.4s; }
+.chain-node:nth-child(4) { animation-delay: 2.1s; }
+.chain-node:nth-child(5) { animation-delay: 2.8s; }
+.chain-node:nth-child(6) { animation-delay: 3.5s; }
+
+@keyframes chain-pulse {
+  0%, 100%  { border-color: var(--md-default-fg-color--lightest); transform: none; }
+  8%        { border-color: var(--md-primary-fg-color); transform: translateY(-4px); }
+  20%       { border-color: var(--md-default-fg-color--lightest); transform: none; }
+}
+
+
+/* --------------------------------------------------------------------------
+   OWNERSHIP MAP: who provides what, and who you pay.
+
+   <div class="owners">
+     <div class="owner">
+       <span class="owner-role">Registrar</span>
+       <b>GoDaddy, Namecheap</b>
+       <span class="owner-what">rents you the NAME</span>
+       <span class="owner-cost">~700/year</span>
+     </div>
+   </div>
+   -------------------------------------------------------------------------- */
+
+.owners {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.7rem;
+  margin: 1.5rem 0;
+}
+
+.owner {
+  padding: 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-top: 4px solid var(--md-primary-fg-color);
+  background: var(--md-code-bg-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.owner:hover { transform: translateY(-4px); box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+
+.owner-role {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--md-primary-fg-color);
+  font-weight: 700;
+}
+.owner b { font-size: 0.85rem; }
+.owner-what { font-size: 0.72rem; color: var(--md-default-fg-color--light); }
+.owner-cost {
+  margin-top: auto;
+  font-family: var(--md-code-font-family);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+
+/* --------------------------------------------------------------------------
+   GIT GRAPH: commits on a branch, drawn as a timeline.
+
+   <div class="gitgraph">
+     <div class="git-branch"><span class="git-branch-name">main</span>
+       <div class="git-commit" data-msg="init"></div>
+       <div class="git-commit" data-msg="add students"></div>
+     </div>
+   </div>
+   -------------------------------------------------------------------------- */
+
+.gitgraph {
+  margin: 1.5rem 0;
+  padding: 1.2rem 1rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 8px;
+  background: var(--md-code-bg-color);
+  overflow-x: auto;
+}
+
+.git-branch {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 1.6rem 0;
+  position: relative;
+  min-width: max-content;
+}
+
+.git-branch-name {
+  flex: 0 0 auto;
+  margin-right: 0.8rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: var(--md-primary-fg-color);
+  color: #fff;
+  font-family: var(--md-code-font-family);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+/* A commit: a dot, a line to the next one, and its message underneath. */
+.git-commit {
+  position: relative;
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--md-primary-fg-color);
+  margin-right: 78px;
+  animation: git-appear 0.4s ease-out backwards;
+}
+
+.git-commit:last-child { margin-right: 0; }
+
+.git-commit::before {          /* the line joining to the next commit */
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 15px;
+  width: 78px;
+  height: 3px;
+  background: var(--md-default-fg-color--lightest);
+}
+.git-commit:last-child::before { display: none; }
+
+.git-commit::after {           /* the message label */
+  content: attr(data-msg);
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--md-code-font-family);
+  font-size: 0.62rem;
+  color: var(--md-default-fg-color--light);
+}
+
+.git-commit:nth-child(2) { animation-delay: 0.1s; }
+.git-commit:nth-child(3) { animation-delay: 0.3s; }
+.git-commit:nth-child(4) { animation-delay: 0.5s; }
+.git-commit:nth-child(5) { animation-delay: 0.7s; }
+.git-commit:nth-child(6) { animation-delay: 0.9s; }
+
+@keyframes git-appear {
+  from { opacity: 0; transform: scale(0.2); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* A second branch, offset and in the accent colour. */
+.git-branch.feature { margin-left: 4.5rem; }
+.git-branch.feature .git-branch-name { background: var(--md-accent-fg-color); }
+.git-branch.feature .git-commit { background: var(--md-accent-fg-color); }
+
+
+/* --------------------------------------------------------------------------
+   LADDER: career progression, each rung taller than the last.
+
+   <div class="ladder">
+     <div class="rung"><b>Junior</b><span>0-2 yrs</span><em>ships small tickets</em></div>
+   </div>
+   -------------------------------------------------------------------------- */
+
+.ladder { display: flex; align-items: flex-end; gap: 0.4rem; margin: 1.5rem 0; overflow-x: auto; }
+
+.rung {
+  flex: 1 1 110px;
+  min-width: 110px;
+  padding: 0.7rem 0.5rem;
+  border-radius: 6px 6px 0 0;
+  background: var(--md-code-bg-color);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-bottom: 4px solid var(--md-primary-fg-color);
+  text-align: center;
+  font-size: 0.7rem;
+  animation: rung-rise 0.5s ease-out backwards;
+}
+
+.rung:nth-child(1) { height: 92px;  animation-delay: 0.05s; }
+.rung:nth-child(2) { height: 116px; animation-delay: 0.15s; }
+.rung:nth-child(3) { height: 140px; animation-delay: 0.25s; }
+.rung:nth-child(4) { height: 164px; animation-delay: 0.35s; }
+.rung:nth-child(5) { height: 188px; animation-delay: 0.45s; }
+.rung:nth-child(6) { height: 212px; animation-delay: 0.55s; }
+
+.rung b { display: block; font-size: 0.78rem; margin-bottom: 0.2rem; }
+.rung span {
+  display: block;
+  font-family: var(--md-code-font-family);
+  font-size: 0.62rem;
+  color: var(--md-primary-fg-color);
+  font-weight: 600;
+}
+.rung em {
+  display: block;
+  margin-top: 0.3rem;
+  font-style: normal;
+  font-size: 0.62rem;
+  color: var(--md-default-fg-color--light);
+}
+
+@keyframes rung-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+
+
+/* --------------------------------------------------------------------------
+   CARD GRID: the "pick a direction" spark pages.
+
+   <div class="cards">
+     <a class="card" href="web.md">
+       <span class="card-icon">🌐</span><b>Web</b><span>HTML, CSS, JS</span>
+     </a>
+   </div>
+   -------------------------------------------------------------------------- */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.7rem;
+  margin: 1.5rem 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  background: var(--md-code-bg-color);
+  text-decoration: none !important;
+  color: inherit !important;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.card:hover { transform: translateY(-4px); border-color: var(--md-primary-fg-color); }
+.card-icon { font-size: 1.6rem; line-height: 1; }
+.card b { font-size: 0.85rem; }
+.card span:last-child { font-size: 0.7rem; color: var(--md-default-fg-color--light); }
+
+
+/* Stop every animation for anyone who has asked their OS to reduce motion. */
+@media (prefers-reduced-motion: reduce) {
+  .chain-node, .git-commit, .rung { animation: none !important; }
+  .owner:hover, .card:hover, .layer:hover { transform: none; }
+}
